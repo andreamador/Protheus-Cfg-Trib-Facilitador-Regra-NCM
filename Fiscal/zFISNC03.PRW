@@ -13,6 +13,29 @@
 
 
 
+User Function MODEL_ABA()
+    Local aParam     := PARAMIXB
+    Local oObj
+    Local cIdPonto  := ""
+    Local cIdModel  := ""
+    Local xRet      := .T.
+
+    If aParam <> NIL
+        oObj := aParam[1]
+        cIdPonto := aParam[2]
+        cIdModel := aParam[3]
+
+        If cIdPonto == "BUTTONBAR" 
+            xRet := {}
+            If oObj:CSource == "FISA170"
+                xRet := {{"Facilitador de NCM", "FACILITADOR", {||U_zFISNC03()}}}
+            EndIf
+            Return xRet
+        EndIf
+    EndIf
+
+Return xRet
+
 
 
 
@@ -1436,14 +1459,15 @@ Static Function IncNCM()
     Local cAliasTrib        := oMarkTrib:Alias()
     Local cMessage          := ""
 
-
+    Local aAreaTrib   := (cAliasTrib)->(FwGetArea())
+    Local nPosMark    := oMarkTrib:At()
 
     (cAliasTrib)->(DbGoTop())
 
     While !(cAliasTrib)->(Eof())
    
         If (cAliasTrib)->F2E_OK  == cMarcTrib
-            cMessage := " / "+ (cAliasTrib)->F2E_TRIB 
+            cMessage += " / "+ (cAliasTrib)->F2E_TRIB 
         EndIf
 
         (cAliasTrib)->(DbSkip())
@@ -1453,8 +1477,6 @@ Static Function IncNCM()
     If !FWAlertNoYes("Tributos Selecionados: "+cMessage,"Continuar ?")
         Return
     EndIf
-
-
 
 
     nTotal := oModNcm:Length()
@@ -1536,6 +1558,9 @@ Static Function IncNCM()
 
     oModNcm:GoLine(1)
 
+    FwRestArea(aAreaTrib)
+    oMarkTrib:GoTo(nPosMark,.t.)
+
 Return
 
 
@@ -1550,8 +1575,7 @@ Static Function incTributo(oMdRegNCM,lAbaIncr)
 
     Local cMarcTrib   := oMarkTrib:Mark()
     Local cAliasTrib  := oMarkTrib:Alias()
-    Local aAreaTrib   := (cAliasTrib)->(FwGetArea())
-    Local nPosMark    := oMarkTrib:At()
+
 
     DBSelectArea(cAliasTrib)
     DBSetOrder(1)
@@ -1584,8 +1608,6 @@ Static Function incTributo(oMdRegNCM,lAbaIncr)
     
     EndDo
 
-    FwRestArea(aAreaTrib)
-    oMarkTrib:GoTo(nPosMark,.t.)
 
 Return
 
