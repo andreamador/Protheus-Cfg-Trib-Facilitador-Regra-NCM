@@ -841,13 +841,11 @@ Static Function  PrepDados()
         If cTabProd == "Z"  //Tabela SBZ
             
             SBZ->(DbSetOrder(1))
-            if !(SBZ->(DbSeek(xFilial("SBZ")+SB1->B1_COD)))
-                SB1->(DbSkip())
-                Loop        
-            Endif
+            if (SBZ->(DbSeek(xFilial("SBZ")+SB1->B1_COD)))
+                nMVA := SBZ->BZ_PICMRET
+                nIPI := SBZ->BZ_IPI
+            EndIf
             
-            nMVA := SBZ->BZ_PICMRET
-            nIPI := SBZ->BZ_IPI
         EndIf
 
         // Grupo de tribudo considerando SB1 OU SBZ
@@ -1475,6 +1473,9 @@ Static Function IncNCM()
 
 
     If !FWAlertNoYes("Tributos Selecionados: "+cMessage,"Continuar ?")
+        oModNcm:GoLine(1)
+        FwRestArea(aAreaTrib)
+        oMarkTrib:GoTo(nPosMark,.t.)    
         Return
     EndIf
 
