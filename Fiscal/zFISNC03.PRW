@@ -30,8 +30,6 @@ USER Function zFISNC03()
     Local oModel
     Local oView
 
-    Local oDlg
-
     Local aTamanho  := MsAdvSize()
     Local nJanLarg  := aTamanho[5]
     Local nJanAltu  := aTamanho[6]
@@ -41,6 +39,7 @@ USER Function zFISNC03()
 
 
     Private aEstrura := {}
+    Private oDlgRegNcm
 
     PrepTabela()
     oModel   := Modelx()
@@ -58,16 +57,16 @@ USER Function zFISNC03()
 
     oView:EnableTitleView("X_FIELD_NCM","Parametros do Configurador")
 
-    DEFINE MSDIALOG oDlg TITLE 'Tela para Marcação de dados - Autumn Code Maker' ;
+    DEFINE MSDIALOG oDlgRegNcm TITLE 'Tela para Marcação de dados - Autumn Code Maker' ;
         FROM 000, 000  TO nJanAltu-20, nJanLarg-10 COLORS 0, 16777215 PIXEL
 
-        oView:SetOwner(oDlg)
+        oView:SetOwner(oDlgRegNcm)
 
         SetFunName("U_zFISNC03")
         oModel:cArgo[1][2] = "U_zFISNC03"
         oView:Activate()
         
-    ACTIVATE MsDialog oDlg CENTERED
+    ACTIVATE MsDialog oDlgRegNcm CENTERED
   
 
     for nIdx := 1 to len(aEstrura)
@@ -111,10 +110,10 @@ Static Function PrepTabela()
 
     aAdd(aFieldCFG, {"X_TABELA"     ,"Consid.Tabela."       , "C",1 ,0,"@!"})
     aAdd(aFieldCFG, {"X_FCEST"      ,"Consid.Cest."         , "C",1 ,0,"@!"})
-    aAdd(aFieldCFG, {"X_FMVA"       ,"Consid.MVA Aux 01"     , "C",1 ,0,"@!"})
-    aAdd(aFieldCFG, {"X_IPI"        ,"Consid.IPI Aux 02"     , "C",1 ,0,"@!"})
+    aAdd(aFieldCFG, {"X_FMVA"       ,"Consid.MVA - Aux 01"     , "C",1 ,0,"@!"})
+    aAdd(aFieldCFG, {"X_IPI"        ,"Consid.IPI - Aux 02"     , "C",1 ,0,"@!"})
     aAdd(aFieldCFG, {"X_ABAS"       ,"Atualiza Abas"         , "C",1 ,0,"@!"})
-    aAdd(aFieldCFG, {"X_DATAVG"     ,"Data Vigencia"         , "D",8 ,0,"@!"})
+    aAdd(aFieldCFG, {"X_DATAVG"     ,"Data Inic. Vigencia"         , "D",8 ,0,"@!"})
 
 
 
@@ -488,6 +487,7 @@ Static function PanelBotao(oPanel)
     Local oBtnObj2
     Local oBtnObj4
     Local oBtnObj5
+    Local oBtnObj6
     Local oFontGrande := TFont():New(cFontNome, , -14, , .T.) 
 
     @ 10, 5 BUTTON oBtnObj1 PROMPT "Carregar NCM";
@@ -508,11 +508,16 @@ Static function PanelBotao(oPanel)
     @ 130, 5 BUTTON oBtnObj5 PROMPT "Limpar Abas";
         SIZE (oPanel:nWidth/2) -10 , 20 OF oPanel PIXEL ACTION {||  limpar() }
 
+    @ 160, 5 BUTTON oBtnObj6 PROMPT "Finalizar";
+        SIZE (oPanel:nWidth/2) -10 , 20 OF oPanel PIXEL ACTION {||  oDlgRegNcm:End() }
+
+
     oBtnObj1:SetFont(oFontGrande)
     oBtnObj2:SetFont(oFontGrande)
     oBtnObj3:SetFont(oFontGrande)
     oBtnObj4:SetFont(oFontGrande)
     oBtnObj5:SetFont(oFontGrande)
+    oBtnObj6:SetFont(oFontGrande)
 Return
 
 /*/{Protheus.doc} Static Function Limpar
