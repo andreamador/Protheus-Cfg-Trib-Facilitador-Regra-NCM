@@ -1488,7 +1488,7 @@ Static Function IncNCM()
     CIS->(DbSetOrder(1))
 
 
-    Begin Transaction
+   // Begin Transaction
         
         For nIx:=1 to oModNcm:Length()
 
@@ -1541,7 +1541,7 @@ Static Function IncNCM()
             EndIf
 
             If !lValid .OR. !lRet
-                DisarmTransaction()
+    //            DisarmTransaction()
                 AutoGrLog(oMdRegNCM:GetErrorMsgText())
                 MostraErro()
                 Exit
@@ -1557,7 +1557,7 @@ Static Function IncNCM()
 
         Next 
     
-    End Transaction
+ //   End Transaction
 
     oModNcm:GoLine(1)
 
