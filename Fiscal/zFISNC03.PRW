@@ -1550,9 +1550,11 @@ Static Function incTributo(oMdRegNCM,lAbaIncr)
 
     Local cMarcTrib   := oMarkTrib:Mark()
     Local cAliasTrib  := oMarkTrib:Alias()
-
+    Local aAreaTrib   := (cAliasTrib)->(FwGetArea())
+    Local nPosMark    := oMarkTrib:At()
 
     DBSelectArea(cAliasTrib)
+    DBSetOrder(1)
     (cAliasTrib)->(DbGoTop())
 
     //Roda Tributos do Mark
@@ -1581,6 +1583,9 @@ Static Function incTributo(oMdRegNCM,lAbaIncr)
         (cAliasTrib)->(DbSkip())
     
     EndDo
+
+    FwRestArea(aAreaTrib)
+    oMarkTrib:GoTo(nPosMark,.t.)
 
 Return
 
