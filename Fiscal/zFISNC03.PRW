@@ -442,9 +442,9 @@ Static Function ViewX()
     oView:createVerticalBox( "ESQUERDA" , 80) 
     oView:createVerticalBox( "DIREITA"  , 20)
 
-    oView:createHorizontalBox( "SUPERIOR"   , 20, "ESQUERDA" ) 
-    oView:createHorizontalBox( "MEIO"       , 40, "ESQUERDA" ) 
-    oView:createHorizontalBox( "INFERIOR"   , 40, "ESQUERDA" ) 
+    oView:createHorizontalBox( "SUPERIOR"   , 25, "ESQUERDA" ) 
+    oView:createHorizontalBox( "MEIO"       , 38, "ESQUERDA" ) 
+    oView:createHorizontalBox( "INFERIOR"   , 37, "ESQUERDA" ) 
 
     oView:CreateFolder( 'FOLDER_NCM', 'MEIO' )
 
@@ -1488,74 +1488,76 @@ Static Function IncNCM()
     CIS->(DbSetOrder(1))
 
 
-
-    
-    For nIx:=1 to oModNcm:Length()
-
-        IncProc('Gerando Regras NCM ...')
-
-
-        oModNcm:GoLine(nIx)
-
-        oMdRegNCM := FWLoadModel('FISA160B')
-        oMdCabNCM := oMdRegNCM:getModel("FISA160B")
-
-
-        if oModNcm:IsDeleted()
-            Loop
-        Endif
-
-        if cNcm == oModNcm:GetValue("Z_NCM")
-            lAbaIncr := .T.
-        Endif
-       
-        cNcm  := oModNcm:GetValue("Z_NCM")
-
-        //Exite NCM 
-        IF CIS->(DBSeek(xFilial("CIS")+cNcm))
-            oMdRegNCM:SetOperation( MODEL_OPERATION_UPDATE )
-            oMdRegNCM:Activate()
-            
-            incTributo(oMdRegNCM,lAbaIncr)
-
-        Else
-            oMdRegNCM:SetOperation( MODEL_OPERATION_INSERT )
-            oMdRegNCM:Activate()
-
-            oMdCabNCM:SetValue("CIS_CODNCM",oModNcm:GetValue("Z_NCM"))            
-
-            incTributo(oMdRegNCM,lAbaIncr)
-        EndIf   //aAllSubmodels
-
-        For nIxSub := 1 To len(oMdRegNCM:aAllSubmodels)
-            If oMdRegNCM:aAllSubmodels[nIxSub]:IsModified()
-                lModificado := .T.
-            EndIf
-        Next
-
-
-        lValid := oMdRegNCM:VldData() 
+    Begin Transaction
         
-        If lValid .AND. lModificado
-            lRet := oMdRegNCM:CommitData()
-        EndIf
+        For nIx:=1 to oModNcm:Length()
 
-        If !lValid .OR. !lRet
-            AutoGrLog(oMdRegNCM:GetErrorMsgText())
-           
-            MostraErro()
-        EndIf
+            IncProc('Gerando Regras NCM ...')
 
-        lValid := .F.
-        lModificado := .F.  
 
-        oMdRegNCM:DeActivate()
-        oMdRegNCM:Destroy()
+            oModNcm:GoLine(nIx)
 
-        lAbaIncr := .F.
+            oMdRegNCM := FWLoadModel('FISA160B')
+            oMdCabNCM := oMdRegNCM:getModel("FISA160B")
 
-    Next 
 
+            if oModNcm:IsDeleted()
+                Loop
+            Endif
+
+            if cNcm == oModNcm:GetValue("Z_NCM")
+                lAbaIncr := .T.
+            Endif
+        
+            cNcm  := oModNcm:GetValue("Z_NCM")
+
+            //Exite NCM 
+            IF CIS->(DBSeek(xFilial("CIS")+cNcm))
+                oMdRegNCM:SetOperation( MODEL_OPERATION_UPDATE )
+                oMdRegNCM:Activate()
+                
+                incTributo(oMdRegNCM,lAbaIncr)
+
+            Else
+                oMdRegNCM:SetOperation( MODEL_OPERATION_INSERT )
+                oMdRegNCM:Activate()
+
+                oMdCabNCM:SetValue("CIS_CODNCM",oModNcm:GetValue("Z_NCM"))            
+
+                incTributo(oMdRegNCM,lAbaIncr)
+            EndIf   //aAllSubmodels
+
+            For nIxSub := 1 To len(oMdRegNCM:aAllSubmodels)
+                If oMdRegNCM:aAllSubmodels[nIxSub]:IsModified()
+                    lModificado := .T.
+                EndIf
+            Next
+
+
+            lValid := oMdRegNCM:VldData() 
+            
+            If lValid .AND. lModificado
+                lRet := oMdRegNCM:CommitData()
+            EndIf
+
+            If !lValid .OR. !lRet
+                DisarmTransaction()
+                AutoGrLog(oMdRegNCM:GetErrorMsgText())
+                MostraErro()
+                Exit
+            EndIf
+
+            lValid := .F.
+            lModificado := .F.  
+
+            oMdRegNCM:DeActivate()
+            oMdRegNCM:Destroy()
+
+            lAbaIncr := .F.
+
+        Next 
+    
+    End Transaction
 
     oModNcm:GoLine(1)
 
