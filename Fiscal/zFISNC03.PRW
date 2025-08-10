@@ -11,7 +11,7 @@
 
 
 
-Static aEstrura := {}
+
 
 
 
@@ -38,6 +38,9 @@ USER Function zFISNC03()
     
     Local nIdx
     Local oTmp
+
+
+    Private aEstrura := {}
 
     PrepTabela()
     oModel   := Modelx()
@@ -316,9 +319,9 @@ Static Function ModelX()
     yObtEstru(aEstrura,"X_GRID_MVA")[PREP_TAB_MODEL]  := oModel:GetModel("M_GRID_MVA")
 
 
-    oModel:GetModel("M_GRID_NCM"):SetLPost({  |oModel,nLine| actLineNCM(oModel,nLine) })
-    oModel:GetModel("M_GRID_ALIQ"):SetLPost({ |oModel,nLine| actLineAliq(oModel,nLine) })
-    oModel:GetModel("M_GRID_MVA"):SetLPost({  |oModel,nLine| actLineMVA(oModel,nLine) })
+    //oModel:GetModel("M_GRID_NCM"):SetLPost({  |oModel,nLine| actLineNCM(oModel,nLine) })
+    //oModel:GetModel("M_GRID_ALIQ"):SetLPost({ |oModel,nLine| actLineAliq(oModel,nLine) })
+    //oModel:GetModel("M_GRID_MVA"):SetLPost({  |oModel,nLine| actLineMVA(oModel,nLine) })
 
 
 
@@ -557,8 +560,11 @@ Static Function PanelTrib(oPanel)
     Processa({|| LoadTrib()}, 'Processando...')
 
     nIdx := aScan(aColTela, { |aCol| aCol[1] == "F2E_OK" } )
-    aDel(aColTela,nIdx)
-    aSize(aColTela,len(aColTela)-1)
+
+    if nIdx > 0
+        aDel(aColTela,nIdx)
+        aSize(aColTela,len(aColTela)-1)
+    EndIf
 
     aColTela := yBrowCols(aColTela,cAliasTrib)  
     aCampSeek := yObterSX3("F2E_TRIB")
