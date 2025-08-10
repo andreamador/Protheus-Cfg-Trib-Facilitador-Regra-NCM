@@ -1,2 +1,2 @@
 Facilitando a Regra de NCM
-[Video](https://studio.youtube.com/video/AF7RCnF2Y5o)
+[Video](https://www.youtube.com/watch?v=AF7RCnF2Y5o&t=1s)
