@@ -131,12 +131,13 @@ Static Function PrepTabela()
 
     aAdd(aFieldCFG, {"X_TABKEY"  ,"kEY"      , "C",3,0,"@!"})
 
-    aAdd(aFieldCFG, {"X_TABELA"     ,"Consid.Tabela."       , "C",1 ,0,"@!"})
-    aAdd(aFieldCFG, {"X_FCEST"      ,"Consid.Cest."         , "C",1 ,0,"@!"})
-    aAdd(aFieldCFG, {"X_FMVA"       ,"Consid.MVA - Aux 01"     , "C",1 ,0,"@!"})
-    aAdd(aFieldCFG, {"X_IPI"        ,"Consid.IPI - Aux 02"     , "C",1 ,0,"@!"})
-    aAdd(aFieldCFG, {"X_ABAS"       ,"Atualiza Abas"         , "C",1 ,0,"@!"})
-    aAdd(aFieldCFG, {"X_DATAVG"     ,"Data Inic. Vigencia"         , "D",8 ,0,"@!"})
+    aAdd(aFieldCFG, {"X_TABELA"     ,"Consid.Tabela."           , "C",1 ,0,"@!"})
+    aAdd(aFieldCFG, {"X_FCEST"      ,"Consid.Cest."             , "C",1 ,0,"@!"})
+    aAdd(aFieldCFG, {"X_FMVA"       ,"Consid.MVA - Aux 01"      , "C",1 ,0,"@!"})
+    aAdd(aFieldCFG, {"X_IPI"        ,"Consid.IPI - Aux 02"      , "C",1 ,0,"@!"})
+    aAdd(aFieldCFG, {"X_ABAS"       ,"Atualiza Abas"            , "C",1 ,0,"@!"})
+    aAdd(aFieldCFG, {"X_SOBRE"      ,"Sobrescreve"              , "C",1 ,0,"@!"})
+    aAdd(aFieldCFG, {"X_DATAVG"     ,"Data Inic. Vigencia"      , "D",8 ,0,"@!"})
 
 
 
@@ -406,6 +407,7 @@ Static Function LoadCof(oModel)
     oModField:SetValue("X_FMVA","S")
     oModField:SetValue("X_IPI","S")
     oModField:SetValue("X_ABAS","T")
+    oModField:SetValue("X_SOBRE","S")
     oModField:SetValue("X_DATAVG",Date())
 
 
@@ -654,7 +656,7 @@ Static Function EstrView()
 
     // Folder 01 - Principal
     ySetStrProp(oStrFieldCFG,"Folder","F01",;
-        {"X_TABELA","X_FCEST","X_FMVA","X_IPI","X_ABAS","X_DATAVG"})
+        {"X_TABELA","X_FCEST","X_FMVA","X_IPI","X_ABAS","X_DATAVG","X_SOBRE"})
     
 
     // Folder 02 - Filtro
@@ -664,7 +666,7 @@ Static Function EstrView()
 
     // Combobox
     ySetStrProp(oStrFieldCFG,"Combo",{"N=Não","S=Sim"},;
-        {"X_FCEST","X_FMVA","X_IPI"})
+        {"X_FCEST","X_FMVA","X_IPI","X_SOBRE"})
 
     ySetStrProp(oStrFieldCFG,"Combo",{"1=SB1","Z=SBZ"},;
         {"X_TABELA"})
@@ -1453,9 +1455,11 @@ Static Function IncNCM()
     Local nTotal            := 0
     Local oModNcm           := yObtEstru(aEstrura,"X_GRID_NCM")[PREP_TAB_MODEL]
     Local oMarkTrib         := yObtEstru(aEstrura,"X_GRID_TRIB")[PREP_TAB_MODEL]
+    Local oModParm          := yObtEstru(aEstrura,"X_FIELD_NCM")[PREP_TAB_MODEL]
     Local cMarcTrib         := oMarkTrib:Mark()
     Local cAliasTrib        := oMarkTrib:Alias()
     Local cMessage          := ""
+    Local cSobrescreve       := oModParm:GetValue("X_SOBRE")
 
     Local aAreaTrib   := (cAliasTrib)->(FwGetArea())
     Local nPosMark    := oMarkTrib:At()
@@ -1505,10 +1509,10 @@ Static Function IncNCM()
                 Loop
             Endif
 
-            if cNcm == oModNcm:GetValue("Z_NCM")
+            if cNcm == oModNcm:GetValue("Z_NCM") .Or. cSobrescreve == "N"
                 lAbaIncr := .T.
             Endif
-        
+
             cNcm  := oModNcm:GetValue("Z_NCM")
 
             //Exite NCM 
