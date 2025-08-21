@@ -1,7 +1,5 @@
 #Include 'Totvs.ch'
 #Include 'FWMVCDef.ch'
- 
-
 
 #DEFINE PREP_TAB_NOME 1
 #DEFINE PREP_TAB_CAMPOS 2
@@ -88,9 +86,9 @@ USER Function zFISNC03()
         SetFunName("U_zFISNC03")
         oModel:cArgo[1][2] = "U_zFISNC03"
         oView:Activate()
-        
+        oDlgRegNcm:Refresh() 
     ACTIVATE MsDialog oDlgRegNcm CENTERED
-  
+
 
     for nIdx := 1 to len(aEstrura)
         oTmp := aEstrura[nIdx,PREP_TAB_OTEMP]
@@ -147,6 +145,9 @@ Static Function PrepTabela()
     aAdd(aFieldCFG, yObterSX3("B1_GRUPO"      ,"X_GRBATE"    ,"Grupo Prod. ate"  ))
     aAdd(aFieldCFG, yObterSX3("B1_GRTRIB"     ,"X_TRIDE"     ,"Grupo Trib. de"   ))
     aAdd(aFieldCFG, yObterSX3("B1_GRTRIB"     ,"X_TRIATE"    ,"Grupo Trib. ate"  ))
+    aAdd(aFieldCFG, yObterSX3("B1_TIPO"       ,"X_TPDE"      ,"Tipo Prod. de"   ))
+    aAdd(aFieldCFG, yObterSX3("B1_TIPO"       ,"X_TPATE"     ,"Tipo Prod. ate"  ))
+
 
 
 
@@ -661,7 +662,7 @@ Static Function EstrView()
 
     // Folder 02 - Filtro
     ySetStrProp(oStrFieldCFG,"Folder","F02",;
-        {"X_PRODE","X_PROATE","X_GRBDE","X_GRBATE","X_TRIDE","X_TRIATE"})
+        {"X_PRODE","X_PROATE","X_GRBDE","X_GRBATE","X_TRIDE","X_TRIATE","X_TPDE","X_TPATE"})
 
 
     // Combobox
@@ -678,7 +679,7 @@ Static Function EstrView()
     ySetStrProp(oStrFieldCFG,"F3", GetSX3Cache("F24_CDPROD","X3_F3"),  {"X_PRODE","X_PROATE"})
     ySetStrProp(oStrFieldCFG,"F3", GetSX3Cache("B1_GRUPO"  ,"X3_F3"),  {"X_GRBDE","X_GRBATE"})
     ySetStrProp(oStrFieldCFG,"F3", GetSX3Cache("B1_GRTRIB" ,"X3_F3"),  {"X_TRIDE","X_TRIATE"})
-
+    ySetStrProp(oStrFieldCFG,"F3", GetSX3Cache("B1_TIPO"   ,"X3_F3"),  {"X_TPDE","X_TPATE"})
 
     ySetStrProp(oStrFieldCFG,"Remove",,;
         {"X_TABKEY"})
@@ -776,6 +777,9 @@ Static Function  PrepDados()
     Local cGrupoAte     := oModParm:GetValue("X_GRBATE")
     Local cTriboDe      := oModParm:GetValue("X_TRIDE")
     Local ctribAte      := oModParm:GetValue("X_TRIATE")
+    Local cTipoPrdDe    := oModParm:GetValue("X_TPDE")
+    Local cTipoPrdAte   := oModParm:GetValue("X_TPATE")
+
 
     Local nMVA          := 0
     Local nIPI          := 0
@@ -822,6 +826,11 @@ Static Function  PrepDados()
 
 
         IF !(SB1->B1_GRUPO >= cGrupoDe .AND. SB1->B1_GRUPO <= cGrupoAte)
+            SB1->(DbSkip())
+            Loop
+        EndIf
+
+        IF !(SB1->B1_TIPO >= cTipoPrdDe .AND. SB1->B1_TIPO <= cTipoPrdAte)
             SB1->(DbSkip())
             Loop
         EndIf
@@ -1512,7 +1521,7 @@ Static Function IncNCM()
             if cNcm == oModNcm:GetValue("Z_NCM") .Or. cSobrescreve == "N"
                 lAbaIncr := .T.
             Endif
-
+        
             cNcm  := oModNcm:GetValue("Z_NCM")
 
             //Exite NCM 
@@ -1638,47 +1647,47 @@ Static Function incAbas(oMdRegNCM,lAbaIncr)
     Local cOperacao := oModParm:GetValue("X_ABAS")
     Local cDataVG   := oModParm:GetValue("X_DATAVG")
     Local nItem     := 0
-
+    Local cMvaIt    := oModNcmMva:GetValue("M_UFORI") 
 
     oMdRegAlq:GoLine(oMdRegAlq:Length())
 
     If cOperacao == "T" .OR. cOperacao == "A"
 
-        if !lAbaIncr
-            DelLineModel(oMdRegAlq,"CIU_UFORI")
-        Endif
+            if !lAbaIncr
+                DelLineModel(oMdRegAlq,"CIU_UFORI")
+            Endif
 
 
-        For nIx := 1 To oModNcmAlq:Length()
-            oModNcmAlq:GoLine(nIx)
-                    
-            If oModNcmAlq:IsDeleted()
-                Loop
-            EndIf
+            For nIx := 1 To oModNcmAlq:Length()
+                oModNcmAlq:GoLine(nIx)
+                        
+                If oModNcmAlq:IsDeleted()
+                    Loop
+                EndIf
 
-            If !Empty(AllTrim(oMdRegAlq:GetValue("CIU_UFORI")))
-                oMdRegAlq:AddLine()
-            EndIf
+                If !Empty(AllTrim(oMdRegAlq:GetValue("CIU_UFORI")))
+                    oMdRegAlq:AddLine()
+                EndIf
 
-            nItem := iif(lAbaIncr, oModNcmAlq:Length() + 1, oModNcmAlq:Length())
+                nItem := iif(lAbaIncr, oModNcmAlq:Length() + 1, oModNcmAlq:Length())
 
-            oMdRegAlq:SetValue("CIU_ITEM"       ,strZero(nItem,4))
-            oMdRegAlq:SetValue("CIU_UFORI"      ,oModNcmAlq:GetValue("Y_UFORI"))
-            oMdRegAlq:SetValue("CIU_UFDEST"     ,oModNcmAlq:GetValue("Y_UFDEST"))
-            oMdRegAlq:SetValue("CIU_VIGINI"     ,cDataVG)
-            oMdRegAlq:SetValue("CIU_ORIGEM"     ,oModNcmAlq:GetValue("Y_ORIGEM"))
-            oMdRegAlq:SetValue("CIU_CEST"       ,cCest)
-            oMdRegAlq:SetValue("CIU_ALIQTR"     ,oModNcmAlq:GetValue("Y_ALIQTR"))
+                oMdRegAlq:SetValue("CIU_ITEM"       ,strZero(nItem,4))
+                oMdRegAlq:SetValue("CIU_UFORI"      ,oModNcmAlq:GetValue("Y_UFORI"))
+                oMdRegAlq:SetValue("CIU_UFDEST"     ,oModNcmAlq:GetValue("Y_UFDEST"))
+                oMdRegAlq:SetValue("CIU_VIGINI"     ,cDataVG)
+                oMdRegAlq:SetValue("CIU_ORIGEM"     ,oModNcmAlq:GetValue("Y_ORIGEM"))
+                oMdRegAlq:SetValue("CIU_CEST"       ,cCest)
+                oMdRegAlq:SetValue("CIU_ALIQTR"     ,oModNcmAlq:GetValue("Y_ALIQTR"))
 
-            If oModNcmAlq:GetValue("Y_TBNCM") == "1"
-                oMdRegAlq:SetValue("CIU_ALIQTR", oModNcm:GetValue("Z_AUX01"))
-            EndIf
+                If oModNcmAlq:GetValue("Y_TBNCM") == "1"
+                    oMdRegAlq:SetValue("CIU_ALIQTR", oModNcm:GetValue("Z_AUX01"))
+                EndIf
 
-            If oModNcmAlq:GetValue("Y_TBNCM") == "2"
-                oMdRegAlq:SetValue("CIU_ALIQTR", oModNcm:GetValue("Z_AUX02"))
-            EndIf
+                If oModNcmAlq:GetValue("Y_TBNCM") == "2"
+                    oMdRegAlq:SetValue("CIU_ALIQTR", oModNcm:GetValue("Z_AUX02"))
+                EndIf
 
-        Next
+            Next     
 
     EndIf
 
@@ -1686,45 +1695,50 @@ Static Function incAbas(oMdRegNCM,lAbaIncr)
 
     If cOperacao == "T" .OR. cOperacao == "M"
 
+        iF cOperacao == "T" .AND. oModNcmMva:Length()==1 .AND. Empty(cMvaIt)      
+            cProblem := "Aba Margem Valor Agregado não esta preenchida"
+            cSolution:= "Configure o parametro: Atualiza Abas com 'A-Aba Aliquota'. "
+            Help(NIL, NIL, "Atenção", NIL, cProblem , 1, 0, NIL, NIL, NIL, NIL, NIL, { cSolution })
+        Else  
 
-        if !lAbaIncr
-            DelLineModel(oMdRegMva,"CIU_UFORI")
-        Endif
+            if !lAbaIncr
+                DelLineModel(oMdRegMva,"CIU_UFORI")
+            Endif
 
-        For nIx := 1 To oModNcmMva:Length()
-            oModNcmMva:GoLine(nIx)
-                    
-            If oModNcmMva:IsDeleted()
-                Loop
-            EndIf
+            For nIx := 1 To oModNcmMva:Length()
+                oModNcmMva:GoLine(nIx)
+                        
+                If oModNcmMva:IsDeleted()
+                    Loop
+                EndIf
 
-            If !Empty(AllTrim(oMdRegMva:GetValue("CIU_UFORI")))
-                oMdRegMva:AddLine()
-            EndIf
+                If !Empty(AllTrim(oMdRegMva:GetValue("CIU_UFORI")))
+                    oMdRegMva:AddLine()
+                EndIf
 
-            nItem := iif(lAbaIncr, oModNcmMva:Length() + 1, oModNcmMva:Length())
+                nItem := iif(lAbaIncr, oModNcmMva:Length() + 1, oModNcmMva:Length())
 
-            oMdRegMva:SetValue("CIU_ITEM"       ,strZero(nItem,4))
-            oMdRegMva:SetValue("CIU_UFORI"      ,oModNcmMva:GetValue("M_UFORI"))
-            oMdRegMva:SetValue("CIU_UFDEST"     ,oModNcmMva:GetValue("M_UFDEST"))
-            oMdRegMva:SetValue("CIU_VIGINI"     ,cDataVG)
-            oMdRegMva:SetValue("CIU_ORIGEM"     ,oModNcmMva:GetValue("M_ORIGEM"))
-            oMdRegMva:SetValue("CIU_CEST"       ,cCest)
-            oMdRegMva:SetValue("CIU_MARGEM"     ,oModNcmMva:GetValue("M_MVA"))
-            oMdRegMva:SetValue("CIU_MVAAUX"     ,oModNcmMva:GetValue("M_MVAAUX"))
+                oMdRegMva:SetValue("CIU_ITEM"       ,strZero(nItem,4))
+                oMdRegMva:SetValue("CIU_UFORI"      ,oModNcmMva:GetValue("M_UFORI"))
+                oMdRegMva:SetValue("CIU_UFDEST"     ,oModNcmMva:GetValue("M_UFDEST"))
+                oMdRegMva:SetValue("CIU_VIGINI"     ,cDataVG)
+                oMdRegMva:SetValue("CIU_ORIGEM"     ,oModNcmMva:GetValue("M_ORIGEM"))
+                oMdRegMva:SetValue("CIU_CEST"       ,cCest)
+                oMdRegMva:SetValue("CIU_MARGEM"     ,oModNcmMva:GetValue("M_MVA"))
+                oMdRegMva:SetValue("CIU_MVAAUX"     ,oModNcmMva:GetValue("M_MVAAUX"))
 
-            
-            If oModNcmMva:GetValue("M_TBNCM") == "1"
-                oMdRegMva:SetValue("CIU_MARGEM", oModNcm:GetValue("Z_AUX01"))
-            EndIf
+                
+                If oModNcmMva:GetValue("M_TBNCM") == "1"
+                    oMdRegMva:SetValue("CIU_MARGEM", oModNcm:GetValue("Z_AUX01"))
+                EndIf
 
-            If oModNcmMva:GetValue("M_TBNCM") == "2"
-                oMdRegMva:SetValue("CIU_MARGEM", oModNcm:GetValue("Z_AUX02"))
-            EndIf
+                If oModNcmMva:GetValue("M_TBNCM") == "2"
+                    oMdRegMva:SetValue("CIU_MARGEM", oModNcm:GetValue("Z_AUX02"))
+                EndIf
 
-        Next
+            Next
+        Endif     
     EndIf
-
 
 Return
 

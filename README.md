@@ -5,3 +5,4 @@ Facilitando a Regra de NCM
     -  10/08/2025 -> Quando der erro ou falha na validação, na geração do NCM, aborta a operação, não interando com toda lista de NCMs, evitando ver a janela de mensagem de erro para cada NCM.
     -  14/08/2025 -> Antes, só era possível sobrescrever. Agora, é possível incrementar as abas de Alíquota e MVA para o imposto selecionado na aba Tributos. O padrão é sobrescrever, mas pode ser configurado para não sobrescrever, ou seja incrementar.
         ![Minha imagem](imagem/001.jpg)
+    -  21/08/2025 -> Colaboração do nosso amigo Luciano Minari, adicionou a opção de filtro "Tipo de Produto", Help de Atenção quando aba MVA não é preenchida, obrigado Luciano!
